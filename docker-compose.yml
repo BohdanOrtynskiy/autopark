@@ -1,0 +1,54 @@
+version: '3.8'
+
+volumes:
+  db_volume:
+    driver: local
+
+networks:
+  php-advanced:
+    driver: bridge
+
+services:
+  #MySQL Service
+  db:
+    image: mysql
+    restart: always
+    command: --default-authentication-plugin=mysql_native_password
+    container_name: course_mysql
+    networks:
+      - php-advanced
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: 123
+    volumes:
+      - "db_volume:/var/lib/mysql/"
+
+  #PHP Service
+  app:
+    build:
+      context: .
+      dockerfile: php/Dockerfile
+    restart: always
+    container_name: course_php
+    volumes:
+      - .:/var/www/html
+    networks:
+      - php-advanced
+
+  #APACHE Service
+  webserver:
+    image: httpd:2.4
+    container_name: course_apache
+    tty: true
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+          - .:/var/www/html
+    networks:
+      - php-advanced
+
+
+
+
